@@ -5,14 +5,8 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
-
-const BooksPlaceholder = () => (
-  <div>
-    <h1 className="text-3xl font-bold tracking-tight">Books Inventory</h1>
-    <p className="text-muted-foreground">Manage your book collection.</p>
-    <div className="mt-8">Loading books...</div>
-  </div>
-);
+import Books from './pages/Books';
+import { Toaster } from '@/components/ui/sonner';
 
 function App() {
   return (
@@ -25,13 +19,14 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/books" element={<BooksPlaceholder />} />
+              <Route path="/books" element={<Books />} />
             </Route>
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
+      <Toaster />
     </AuthProvider>
   );
 }
