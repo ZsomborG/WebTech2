@@ -1,7 +1,8 @@
-import express, { Express, Request, Response } from 'express';
-import mongoose from 'mongoose';
+import express, { Express } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { connectDB } from './config/db';
+import { errorHandler } from './middleware/errorMiddleware';
 import authRoutes from './routes/authRoutes';
 import bookRoutes from './routes/bookRoutes';
 
@@ -10,25 +11,19 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 5000;
 
+// Connect to Database
+connectDB();
+
 app.use(cors());
 app.use(express.json());
 
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/books', bookRoutes);
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Library System API is running');
+// Error Handler (must be last)
+app.use(errorHandler);
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
-
-const mongodbUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/library_system';
-
-mongoose.connect(mongodbUri)
-  .then(() => {
-    console.log('Connected to MongoDB');
-    app.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
-    });
-  })
-  .catch((error) => {
-    console.error('MongoDB connection error:', error);
-  });

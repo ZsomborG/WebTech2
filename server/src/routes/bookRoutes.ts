@@ -1,13 +1,13 @@
 import express from 'express';
-import { getBooks, addBook, deleteBook } from '../controllers/bookController';
+import { bookController } from '../controllers/bookController';
 import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-router.use(protect); // All book routes require authentication
+router.use(protect);
 
-router.get('/', getBooks);
-router.post('/', addBook);
-router.delete('/:id', deleteBook);
+router.get('/', bookController.getBooks);
+router.post('/', bookController.addBook);
+router.delete('/:id', bookController.deleteBook);
 
 export default router;
