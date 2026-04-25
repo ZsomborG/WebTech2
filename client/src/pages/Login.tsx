@@ -4,11 +4,18 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '../context/AuthContext';
-import api from '../lib/api';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { authService } from '../services/AuthService';
+import {
+  Button,
+  Input,
+  Label,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -31,11 +38,11 @@ const Login = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.post('/auth/login', data);
-      login(response.data);
+      const userData = await authService.login(data);
+      login(userData);
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -45,31 +52,37 @@ const Login = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Login</CardTitle>
-          <CardDescription>Enter your username and password</CardDescription>
+          <CardTitle className="text-2xl font-bold text-center">Login</CardTitle>
+          <CardDescription className="text-center text-gray-500">
+            Access your library management system
+          </CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
           <CardContent className="space-y-4">
             <div className="space-y-1">
               <Label htmlFor="username">Username</Label>
-              <Input id="username" {...register('username')} />
+              <Input id="username" {...register('username')} placeholder="admin" />
               {errors.username && <p className="text-xs text-red-500">{errors.username.message}</p>}
             </div>
             <div className="space-y-1">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" {...register('password')} />
+              <Input id="password" type="password" {...register('password')} placeholder="••••••••" />
               {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
             </div>
-            {error && <p className="text-sm text-red-500">{error}</p>}
+            {error && (
+              <div className="p-2 rounded bg-red-50 text-red-500 text-xs font-medium text-center">
+                {error}
+              </div>
+            )}
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Processing...' : 'Login'}
+              {loading ? 'Logging in...' : 'Sign In'}
             </Button>
             <div className="text-sm text-center text-gray-500">
-              New here?{' '}
-              <Link to="/register" className="text-blue-500 hover:underline">
-                Register
+              Don't have an account?{' '}
+              <Link to="/register" className="text-blue-500 hover:underline font-medium">
+                Create one
               </Link>
             </div>
           </CardFooter>

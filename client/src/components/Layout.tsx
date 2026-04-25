@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { useNavigate, Link, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Button } from '@/components/ui/button';
+import {
+  Button,
+} from '@/components/ui';
 import { 
   LayoutDashboard, 
   BookOpen, 
@@ -52,20 +54,20 @@ const Layout: React.FC = () => {
 
         <div className="p-4 border-t">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">
+            <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-xs">
               {user?.username.charAt(0).toUpperCase()}
             </div>
-            <div className="text-sm">
-              <p className="font-bold leading-none">{user?.username}</p>
-              <p className="text-gray-500 capitalize">{user?.role}</p>
+            <div className="text-xs overflow-hidden">
+              <p className="font-bold leading-none truncate">{user?.username}</p>
+              <p className="text-gray-500 capitalize mt-0.5">{user?.role}</p>
             </div>
           </div>
           <Button 
             variant="ghost" 
-            className="w-full justify-start text-red-500 hover:bg-red-50 gap-2"
+            className="w-full justify-start text-red-500 hover:bg-red-50 gap-2 h-8 text-xs"
             onClick={handleLogout}
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-3.5 h-3.5" />
             <span>Logout</span>
           </Button>
         </div>

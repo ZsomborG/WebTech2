@@ -4,11 +4,18 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '../context/AuthContext';
-import api from '../lib/api';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { authService } from '../services/AuthService';
+import {
+  Button,
+  Input,
+  Label,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui';
 
 const registerSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters'),
@@ -35,12 +42,12 @@ const Register = () => {
     setLoading(true);
     setError(null);
     try {
-      const { confirmPassword, ...registerData } = data;
-      const response = await api.post('/auth/register', registerData);
-      login(response.data);
+      const { confirmPassword: _, ...registerData } = data;
+      const userData = await authService.register(registerData);
+      login(userData);
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -50,36 +57,42 @@ const Register = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Register</CardTitle>
-          <CardDescription>Create your account</CardDescription>
+          <CardTitle className="text-2xl font-bold text-center">Register</CardTitle>
+          <CardDescription className="text-center text-gray-500">
+            Join the library system today
+          </CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
           <CardContent className="space-y-3">
             <div className="space-y-1">
               <Label htmlFor="username">Username</Label>
-              <Input id="username" {...register('username')} />
+              <Input id="username" {...register('username')} placeholder="Choose a name" />
               {errors.username && <p className="text-xs text-red-500">{errors.username.message}</p>}
             </div>
             <div className="space-y-1">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" {...register('password')} />
+              <Input id="password" type="password" {...register('password')} placeholder="Min 6 characters" />
               {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
             </div>
             <div className="space-y-1">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input id="confirmPassword" type="password" {...register('confirmPassword')} />
+              <Input id="confirmPassword" type="password" {...register('confirmPassword')} placeholder="Repeat password" />
               {errors.confirmPassword && <p className="text-xs text-red-500">{errors.confirmPassword.message}</p>}
             </div>
-            {error && <p className="text-sm text-red-500">{error}</p>}
+            {error && (
+              <div className="p-2 rounded bg-red-50 text-red-500 text-xs font-medium text-center">
+                {error}
+              </div>
+            )}
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Processing...' : 'Register'}
+              {loading ? 'Creating account...' : 'Create Account'}
             </Button>
             <div className="text-sm text-center text-gray-500">
               Already have an account?{' '}
-              <Link to="/login" className="text-blue-500 hover:underline">
-                Login
+              <Link to="/login" className="text-blue-500 hover:underline font-medium">
+                Log in
               </Link>
             </div>
           </CardFooter>

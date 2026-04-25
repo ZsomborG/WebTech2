@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   BarChart, 
   Bar, 
@@ -12,11 +11,11 @@ import {
   Pie, 
   Cell 
 } from 'recharts';
-import api from '../lib/api';
+import { bookService } from '../services/BookService';
+import { APP_CONSTANTS } from '../constants/app.constants';
 import type { Book } from '../types/book';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
 import { BookOpen, Package, Hash } from 'lucide-react';
-
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -25,15 +24,15 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const response = await api.get('/books');
-        setBooks(response.data);
+        const data = await bookService.getBooks();
+        setBooks(data);
       } catch (error) {
         console.error('Failed to fetch books', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchBooks();
+    void fetchBooks();
   }, []);
 
   const totalBooks = books.reduce((acc, book) => acc + book.quantity, 0);
@@ -60,7 +59,7 @@ const Dashboard = () => {
     return acc;
   }, []).sort((a, b) => parseInt(a.year) - parseInt(b.year));
 
-  if (loading) return <div className="p-4">Loading dashboard...</div>;
+  if (loading) return <div className="p-4 text-gray-500">Loading dashboard data...</div>;
 
   const stats = [
     { title: 'Total Copies', value: totalBooks, icon: Package, color: 'text-blue-500' },
@@ -72,14 +71,14 @@ const Dashboard = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-gray-500">Overview of your collection.</p>
+        <p className="text-gray-500 text-sm">Real-time overview of your library collection.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
         {stats.map((stat) => (
           <Card key={stat.title}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-500">{stat.title}</CardTitle>
               <stat.icon className={`w-4 h-4 ${stat.color}`} />
             </CardHeader>
             <CardContent>
@@ -106,7 +105,7 @@ const Dashboard = () => {
                   dataKey="value"
                 >
                   {genreData.map((_entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell key={`cell-${index}`} fill={APP_CONSTANTS.CHART_COLORS[index % APP_CONSTANTS.CHART_COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -122,11 +121,11 @@ const Dashboard = () => {
           <CardContent className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={yearData}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="year" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="count" fill="#3b82f6" />
+                <Bar dataKey="count" fill={APP_CONSTANTS.CHART_COLORS[0]} radius={[2, 2, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

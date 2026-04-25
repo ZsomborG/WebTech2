@@ -1,53 +1,35 @@
 import { useEffect, useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import api from '../lib/api';
-import type { Book } from '../types/book';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useBooks } from '../hooks/useBooks';
+import { bookFormSchema, type BookFormValues } from '../schemas/book.schema';
 import {
+  Button,
+  Input,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Badge } from '@/components/ui/badge';
+  Badge,
+} from '@/components/ui';
 import { Plus, Search, Trash2, Book as BookIcon } from 'lucide-react';
-import { toast } from 'sonner';
-
-const bookFormSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  author: z.string().min(1, 'Author is required'),
-  isbn: z.string().min(1, 'ISBN is required'),
-  publishedYear: z.number().int().min(1000).max(new Date().getFullYear()),
-  genre: z.string().min(1, 'Genre is required'),
-  quantity: z.number().int().min(0),
-});
-
-type BookFormValues = z.infer<typeof bookFormSchema>;
 
 const Books = () => {
-  const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { books, loading, fetchBooks, addBook, deleteBook } = useBooks();
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -63,41 +45,15 @@ const Books = () => {
     },
   });
 
-  const fetchBooks = async () => {
-    try {
-      const response = await api.get('/books');
-      setBooks(response.data);
-    } catch (error) {
-      toast.error('Failed to fetch books');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     void fetchBooks();
-  }, []);
+  }, [fetchBooks]);
 
   const onSubmit: SubmitHandler<BookFormValues> = async (data) => {
-    try {
-      await api.post('/books', data);
-      toast.success('Book added successfully');
+    const success = await addBook(data);
+    if (success) {
       setIsDialogOpen(false);
       form.reset();
-      void fetchBooks();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to add book');
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this book?')) return;
-    try {
-      await api.delete(`/books/${id}`);
-      toast.success('Book deleted');
-      void fetchBooks();
-    } catch (error) {
-      toast.error('Failed to delete book');
     }
   };
 
@@ -293,7 +249,7 @@ const Books = () => {
                       variant="ghost"
                       size="icon"
                       className="text-gray-400 hover:text-red-500"
-                      onClick={() => void handleDelete(book._id)}
+                      onClick={() => void deleteBook(book._id)}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

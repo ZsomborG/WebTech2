@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import type { User, AuthState } from '../types/auth';
+import { STORAGE_KEYS } from '../constants/app.constants';
+import * as React from "react";
 
 interface AuthContextType extends AuthState {
   login: (userData: User) => void;
@@ -15,7 +17,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
     if (storedUser) {
       setState({ user: JSON.parse(storedUser), loading: false });
     } else {
@@ -24,12 +26,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = (userData: User) => {
-    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
     setState({ user: userData, loading: false });
   };
 
   const logout = () => {
-    localStorage.removeItem('user');
+    localStorage.removeItem(STORAGE_KEYS.USER);
     setState({ user: null, loading: false });
   };
 
