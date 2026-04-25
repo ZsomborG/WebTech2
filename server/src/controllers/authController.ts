@@ -23,7 +23,9 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   try {
     const validation = registerSchema.safeParse(req.body);
     if (!validation.success) {
-      res.status(400).json({ message: validation.error.errors[0].message });
+      const errors = validation.error.flatten().fieldErrors;
+      const firstError = Object.values(errors)[0]?.[0] || 'Validation failed';
+      res.status(400).json({ message: firstError });
       return;
     }
 
