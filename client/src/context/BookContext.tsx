@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { type Book } from '../types/book';
+import { type Book, CreateBookDTO, UpdateBookDTO } from '../types/book';
 import { bookService } from '../services/BookService';
 import { toast } from 'sonner';
 
@@ -7,8 +7,8 @@ interface BookContextType {
   books: Book[];
   loading: boolean;
   fetchBooks: () => Promise<void>;
-  addBook: (bookData: any) => Promise<boolean>;
-  updateBook: (id: string, bookData: any) => Promise<boolean>;
+  addBook: (bookData: CreateBookDTO) => Promise<boolean>;
+  updateBook: (id: string, bookData: UpdateBookDTO) => Promise<boolean>;
   deleteBook: (id: string) => Promise<void>;
   initialized: boolean;
 }
@@ -33,7 +33,7 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const addBook = async (bookData: any) => {
+  const addBook = async (bookData: CreateBookDTO) => {
     try {
       const newBook = await bookService.addBook(bookData);
       toast.success('Book added successfully');
@@ -45,7 +45,7 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const updateBook = async (id: string, bookData: any) => {
+  const updateBook = async (id: string, bookData: UpdateBookDTO) => {
     try {
       const updatedBook = await bookService.updateBook(id, bookData);
       toast.success('Book updated successfully');

@@ -7,8 +7,8 @@ export interface Book {
   genre: string;
   quantity: number;
   addedBy: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export type CreateBookDTO = Omit<Book, '_id' | 'addedBy' | 'createdAt' | 'updatedAt'>;

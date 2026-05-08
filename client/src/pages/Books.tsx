@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useBooks } from '../hooks/useBooks';
 import { bookFormSchema, type BookFormValues } from '../schemas/book.schema';
@@ -29,7 +29,7 @@ import {
 import { Plus, Search, Trash2, Edit2, Book as BookIcon } from 'lucide-react';
 
 const Books = () => {
-  const { books, loading, fetchBooks, addBook, updateBook, deleteBook } = useBooks();
+  const { books, loading, fetchBooks, addBook, updateBook, deleteBook, initialized } = useBooks();
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBookId, setEditingBookId] = useState<string | null>(null);

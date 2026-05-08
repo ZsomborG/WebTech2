@@ -1,5 +1,5 @@
 import { BaseService } from './BaseService';
-import { type Book } from '../types/book';
+import { type Book, CreateBookDTO, UpdateBookDTO } from '../types/book';
 
 export class BookService extends BaseService {
   async getBooks(): Promise<Book[]> {
@@ -11,7 +11,7 @@ export class BookService extends BaseService {
     }
   }
 
-  async addBook(bookData: any): Promise<Book> {
+  async addBook(bookData: CreateBookDTO): Promise<Book> {
     try {
       const response = await this.api.post<Book>('/books', bookData);
       return response.data;
@@ -20,7 +20,7 @@ export class BookService extends BaseService {
     }
   }
 
-  async updateBook(id: string, bookData: any): Promise<Book> {
+  async updateBook(id: string, bookData: UpdateBookDTO): Promise<Book> {
     try {
       const response = await this.api.put<Book>(`/books/${id}`, bookData);
       return response.data;
