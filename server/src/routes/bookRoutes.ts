@@ -8,6 +8,7 @@ router.use(protect);
 
 router.get('/', bookController.getBooks);
 router.post('/', bookController.addBook);
+router.put('/:id', bookController.updateBook);
 router.delete('/:id', bookController.deleteBook);
 
 export default router;

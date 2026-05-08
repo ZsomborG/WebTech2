@@ -20,6 +20,14 @@ export class BookService {
     });
   }
 
+  async updateBook(id: string, bookData: any) {
+    const book = await this.bookRepo.findById(id);
+    if (!book) {
+      throw new AppError('Book not found', 404);
+    }
+    return await this.bookRepo.update(id, bookData);
+  }
+
   async deleteBook(id: string) {
     const book = await this.bookRepo.findById(id);
     if (!book) {

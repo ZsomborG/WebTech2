@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useForm, type SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useBooks } from '../hooks/useBooks';
 import { bookFormSchema, type BookFormValues } from '../schemas/book.schema';
@@ -26,12 +26,13 @@ import {
   FormMessage,
   Badge,
 } from '@/components/ui';
-import { Plus, Search, Trash2, Book as BookIcon } from 'lucide-react';
+import { Plus, Search, Trash2, Edit2, Book as BookIcon } from 'lucide-react';
 
 const Books = () => {
-  const { books, loading, fetchBooks, addBook, deleteBook } = useBooks();
+  const { books, loading, fetchBooks, addBook, updateBook, deleteBook } = useBooks();
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingBookId, setEditingBookId] = useState<string | null>(null);
 
   const form = useForm<BookFormValues>({
     resolver: zodResolver(bookFormSchema),
@@ -50,11 +51,42 @@ const Books = () => {
   }, [fetchBooks]);
 
   const onSubmit: SubmitHandler<BookFormValues> = async (data) => {
-    const success = await addBook(data);
+    let success = false;
+    if (editingBookId) {
+      success = await updateBook(editingBookId, data);
+    } else {
+      success = await addBook(data);
+    }
+
     if (success) {
       setIsDialogOpen(false);
-      form.reset();
+      handleCloseDialog();
     }
+  };
+
+  const handleEdit = (book: any) => {
+    setEditingBookId(book._id);
+    form.reset({
+      title: book.title,
+      author: book.author,
+      isbn: book.isbn,
+      publishedYear: book.publishedYear,
+      genre: book.genre,
+      quantity: book.quantity,
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setEditingBookId(null);
+    form.reset({
+      title: '',
+      author: '',
+      isbn: '',
+      publishedYear: new Date().getFullYear(),
+      genre: '',
+      quantity: 1,
+    });
   };
 
   const filteredBooks = books.filter((book) =>
@@ -71,15 +103,18 @@ const Books = () => {
           <p className="text-gray-500">Manage and track your library collection.</p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) handleCloseDialog();
+        }}>
           <DialogTrigger render={<Button className="gap-2" />}>
             <Plus className="w-4 h-4" /> Add New Book
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Add New Book</DialogTitle>
+              <DialogTitle>{editingBookId ? 'Edit Book' : 'Add New Book'}</DialogTitle>
               <DialogDescription>
-                Enter the details of the new book to add it to the collection.
+                {editingBookId ? 'Update the details of the selected book.' : 'Enter the details of the new book to add it to the collection.'}
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
@@ -174,7 +209,9 @@ const Books = () => {
                     )}
                   />
                 </div>
-                <Button type="submit" className="w-full">Save Book</Button>
+                <Button type="submit" className="w-full">
+                  {editingBookId ? 'Update Book' : 'Save Book'}
+                </Button>
               </form>
             </Form>
           </DialogContent>
@@ -197,7 +234,7 @@ const Books = () => {
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-50/50 hover:bg-gray-50/50">
-              <TableHead className="w-75">Book Details</TableHead>
+              <TableHead className="w-[300px]">Book Details</TableHead>
               <TableHead>Genre</TableHead>
               <TableHead>ISBN</TableHead>
               <TableHead>Year</TableHead>
@@ -245,14 +282,24 @@ const Books = () => {
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-gray-400 hover:text-red-500"
-                      onClick={() => void deleteBook(book._id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <div className="flex justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-gray-400 hover:text-blue-500"
+                        onClick={() => handleEdit(book)}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-gray-400 hover:text-red-500"
+                        onClick={() => void deleteBook(book._id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

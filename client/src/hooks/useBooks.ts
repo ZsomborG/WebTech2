@@ -31,6 +31,18 @@ export const useBooks = () => {
     }
   };
 
+  const updateBook = async (id: string, bookData: any) => {
+    try {
+      const updatedBook = await bookService.updateBook(id, bookData);
+      toast.success('Book updated successfully');
+      setBooks((prev) => prev.map((b) => (b._id === id ? updatedBook : b)));
+      return true;
+    } catch (error: any) {
+      toast.error(error.message);
+      return false;
+    }
+  };
+
   const deleteBook = async (id: string) => {
     if (!window.confirm('Are you sure?')) return;
     try {

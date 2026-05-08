@@ -20,6 +20,15 @@ export class BookService extends BaseService {
     }
   }
 
+  async updateBook(id: string, bookData: any): Promise<Book> {
+    try {
+      const response = await this.api.put<Book>(`/books/${id}`, bookData);
+      return response.data;
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
   async deleteBook(id: string): Promise<void> {
     try {
       await this.api.delete(`/books/${id}`);

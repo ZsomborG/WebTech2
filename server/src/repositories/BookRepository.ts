@@ -17,6 +17,10 @@ export class BookRepository {
     return await Book.create(bookData);
   }
 
+  async update(id: string, bookData: any) {
+    return await Book.findByIdAndUpdate(id, bookData, { new: true, runValidators: true });
+  }
+
   async delete(id: string) {
     return await Book.findByIdAndDelete(id);
   }

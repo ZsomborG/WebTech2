@@ -41,6 +41,22 @@ export class BookController {
     }
   };
 
+  updateBook = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const validation = bookSchema.safeParse(req.body);
+      if (!validation.success) {
+        const errors = validation.error.flatten().fieldErrors;
+        const firstError = Object.values(errors)[0]?.[0] || 'Validation failed';
+        return next(new AppError(firstError, 400));
+      }
+
+      const book = await this.service.updateBook(req.params.id as string, validation.data);
+      res.json(book);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   deleteBook = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       await this.service.deleteBook(req.params.id as string);
