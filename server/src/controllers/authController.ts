@@ -19,8 +19,8 @@ export class AuthController {
   register = async (req: Request, res: Response) => {
     const validation = registerSchema.safeParse(req.body);
     if (!validation.success) {
-      const errors = validation.error.flatten().fieldErrors;
-      const firstError = Object.values(errors)[0]?.[0] || 'Validation failed';
+      const { fieldErrors } = z.flattenError(validation.error);
+      const firstError = Object.values(fieldErrors)[0]?.[0] || 'Validation failed';
       throw new AppError(firstError, 400);
     }
 
