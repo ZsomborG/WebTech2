@@ -16,54 +16,38 @@ const bookSchema = z.object({
 export class BookController {
   constructor(private service: BookService) {}
 
-  getBooks = async (req: AuthRequest, res: Response, next: NextFunction) => {
-    try {
-      const books = await this.service.getAllBooks();
-      res.json(books);
-    } catch (error) {
-      next(error);
-    }
+  getBooks = async (req: AuthRequest, res: Response) => {
+    const books = await this.service.getAllBooks();
+    res.json(books);
   };
 
-  addBook = async (req: AuthRequest, res: Response, next: NextFunction) => {
-    try {
-      const validation = bookSchema.safeParse(req.body);
-      if (!validation.success) {
-        const errors = validation.error.flatten().fieldErrors;
-        const firstError = Object.values(errors)[0]?.[0] || 'Validation failed';
-        return next(new AppError(firstError, 400));
-      }
-
-      const book = await this.service.createBook(validation.data, req.user._id);
-      res.status(201).json(book);
-    } catch (error) {
-      next(error);
+  addBook = async (req: AuthRequest, res: Response) => {
+    const validation = bookSchema.safeParse(req.body);
+    if (!validation.success) {
+      const errors = validation.error.flatten().fieldErrors;
+      const firstError = Object.values(errors)[0]?.[0] || 'Validation failed';
+      throw new AppError(firstError, 400);
     }
+
+    const book = await this.service.createBook(validation.data, req.user._id);
+    res.status(201).json(book);
   };
 
-  updateBook = async (req: AuthRequest, res: Response, next: NextFunction) => {
-    try {
-      const validation = bookSchema.safeParse(req.body);
-      if (!validation.success) {
-        const errors = validation.error.flatten().fieldErrors;
-        const firstError = Object.values(errors)[0]?.[0] || 'Validation failed';
-        return next(new AppError(firstError, 400));
-      }
-
-      const book = await this.service.updateBook(req.params.id as string, validation.data);
-      res.json(book);
-    } catch (error) {
-      next(error);
+  updateBook = async (req: AuthRequest, res: Response) => {
+    const validation = bookSchema.safeParse(req.body);
+    if (!validation.success) {
+      const errors = validation.error.flatten().fieldErrors;
+      const firstError = Object.values(errors)[0]?.[0] || 'Validation failed';
+      throw new AppError(firstError, 400);
     }
+
+    const book = await this.service.updateBook(req.params.id as string, validation.data);
+    res.json(book);
   };
 
-  deleteBook = async (req: AuthRequest, res: Response, next: NextFunction) => {
-    try {
-      await this.service.deleteBook(req.params.id as string);
-      res.json({ message: 'Book removed' });
-    } catch (error) {
-      next(error);
-    }
+  deleteBook = async (req: AuthRequest, res: Response) => {
+    await this.service.deleteBook(req.params.id as string);
+    res.json({ message: 'Book removed' });
   };
 }
 

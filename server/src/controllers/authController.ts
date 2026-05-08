@@ -16,34 +16,26 @@ const loginSchema = z.object({
 export class AuthController {
   constructor(private service: AuthService) {}
 
-  register = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const validation = registerSchema.safeParse(req.body);
-      if (!validation.success) {
-        const errors = validation.error.flatten().fieldErrors;
-        const firstError = Object.values(errors)[0]?.[0] || 'Validation failed';
-        return next(new AppError(firstError, 400));
-      }
-
-      const user = await this.service.register(validation.data);
-      res.status(201).json(user);
-    } catch (error) {
-      next(error);
+  register = async (req: Request, res: Response) => {
+    const validation = registerSchema.safeParse(req.body);
+    if (!validation.success) {
+      const errors = validation.error.flatten().fieldErrors;
+      const firstError = Object.values(errors)[0]?.[0] || 'Validation failed';
+      throw new AppError(firstError, 400);
     }
+
+    const user = await this.service.register(validation.data);
+    res.status(201).json(user);
   };
 
-  login = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const validation = loginSchema.safeParse(req.body);
-      if (!validation.success) {
-        return next(new AppError('Invalid input', 400));
-      }
-
-      const user = await this.service.login(validation.data);
-      res.json(user);
-    } catch (error) {
-      next(error);
+  login = async (req: Request, res: Response) => {
+    const validation = loginSchema.safeParse(req.body);
+    if (!validation.success) {
+      throw new AppError('Invalid input', 400);
     }
+
+    const user = await this.service.login(validation.data);
+    res.json(user);
   };
 }
 
