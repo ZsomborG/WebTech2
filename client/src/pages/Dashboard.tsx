@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { 
   BarChart, 
   Bar, 
@@ -17,13 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
 import { BookOpen, Package, Hash } from 'lucide-react';
 
 const Dashboard = () => {
-  const { books, loading, fetchBooks, initialized } = useBooks();
-
-  useEffect(() => {
-    if (!initialized) {
-      void fetchBooks();
-    }
-  }, [fetchBooks, initialized]);
+  const { books, loading } = useBooks();
 
   const totalBooks = books.reduce((acc, book) => acc + book.quantity, 0);
   const uniqueTitles = books.length;

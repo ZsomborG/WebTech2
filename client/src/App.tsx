@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { AuthProvider } from './context/AuthContext';
-import { BookProvider } from './context/BookContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import Login from './pages/Login';
@@ -9,10 +10,19 @@ import Dashboard from './pages/Dashboard';
 import Books from './pages/Books';
 import { Toaster } from '@/components/ui/sonner';
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+    },
+  },
+});
+
 function App() {
   return (
-    <AuthProvider>
-      <BookProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
         <Router>
           <Routes>
             <Route path="/login" element={<Login />} />
@@ -29,8 +39,9 @@ function App() {
           </Routes>
         </Router>
         <Toaster />
-      </BookProvider>
-    </AuthProvider>
+      </AuthProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
 

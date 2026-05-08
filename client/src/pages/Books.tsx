@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useBooks } from '../hooks/useBooks';
@@ -30,7 +30,7 @@ import {
 import { Plus, Search, Trash2, Edit2, Book as BookIcon } from 'lucide-react';
 
 const Books = () => {
-  const { books, loading, fetchBooks, addBook, updateBook, deleteBook, initialized } = useBooks();
+  const { books, loading, addBook, updateBook, deleteBook } = useBooks();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -49,12 +49,6 @@ const Books = () => {
       quantity: 1,
     },
   });
-
-  useEffect(() => {
-    if (!initialized) {
-      void fetchBooks();
-    }
-  }, [fetchBooks, initialized]);
 
   const onSubmit: SubmitHandler<BookFormValues> = async (data) => {
     let success = false;
