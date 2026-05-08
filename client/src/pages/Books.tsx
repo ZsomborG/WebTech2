@@ -47,8 +47,10 @@ const Books = () => {
   });
 
   useEffect(() => {
-    void fetchBooks();
-  }, [fetchBooks]);
+    if (!initialized) {
+      void fetchBooks();
+    }
+  }, [fetchBooks, initialized]);
 
   const onSubmit: SubmitHandler<BookFormValues> = async (data) => {
     let success = false;

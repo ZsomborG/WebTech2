@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { 
   BarChart, 
   Bar, 
@@ -11,29 +11,19 @@ import {
   Pie, 
   Cell 
 } from 'recharts';
-import { bookService } from '../services/BookService';
+import { useBooks } from '../hooks/useBooks';
 import { APP_CONSTANTS } from '../constants/app.constants';
-import type { Book } from '../types/book';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
 import { BookOpen, Package, Hash } from 'lucide-react';
 
 const Dashboard = () => {
-  const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { books, loading, fetchBooks, initialized } = useBooks();
 
   useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const data = await bookService.getBooks();
-        setBooks(data);
-      } catch (error) {
-        console.error('Failed to fetch books', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    void fetchBooks();
-  }, []);
+    if (!initialized) {
+      void fetchBooks();
+    }
+  }, [fetchBooks, initialized]);
 
   const totalBooks = books.reduce((acc, book) => acc + book.quantity, 0);
   const uniqueTitles = books.length;
