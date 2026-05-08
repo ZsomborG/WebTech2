@@ -1,14 +1,14 @@
 import express from 'express';
 import { bookController } from '../controllers/bookController';
-import { protect } from '../middleware/authMiddleware';
+import { protect, admin } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
 router.use(protect);
 
 router.get('/', bookController.getBooks);
-router.post('/', bookController.addBook);
-router.put('/:id', bookController.updateBook);
-router.delete('/:id', bookController.deleteBook);
+router.post('/', admin, bookController.addBook);
+router.put('/:id', admin, bookController.updateBook);
+router.delete('/:id', admin, bookController.deleteBook);
 
 export default router;

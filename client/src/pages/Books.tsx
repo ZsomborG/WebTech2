@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useBooks } from '../hooks/useBooks';
+import { useAuth } from '../context/AuthContext';
 import { bookFormSchema, type BookFormValues } from '../schemas/book.schema';
 import {
   Button,
@@ -30,9 +31,12 @@ import { Plus, Search, Trash2, Edit2, Book as BookIcon } from 'lucide-react';
 
 const Books = () => {
   const { books, loading, fetchBooks, addBook, updateBook, deleteBook, initialized } = useBooks();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingBookId, setEditingBookId] = useState<string | null>(null);
+
+  const isAdmin = user?.role === 'admin';
 
   const form = useForm<BookFormValues>({
     resolver: zodResolver(bookFormSchema),
@@ -102,122 +106,126 @@ const Books = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold">Books Inventory</h1>
-          <p className="text-gray-500">Manage and track your library collection.</p>
+          <p className="text-gray-500">
+            {isAdmin ? 'Manage and track your library collection.' : 'View and search the library collection.'}
+          </p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={(open) => {
-          setIsDialogOpen(open);
-          if (!open) handleCloseDialog();
-        }}>
-          <DialogTrigger render={<Button className="gap-2" />}>
-            <Plus className="w-4 h-4" /> Add New Book
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>{editingBookId ? 'Edit Book' : 'Add New Book'}</DialogTitle>
-              <DialogDescription>
-                {editingBookId ? 'Update the details of the selected book.' : 'Enter the details of the new book to add it to the collection.'}
-              </DialogDescription>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Title</FormLabel>
-                      <FormControl>
-                        <Input placeholder="The Great Gatsby" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="grid grid-cols-2 gap-4">
+        {isAdmin && (
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) handleCloseDialog();
+          }}>
+            <DialogTrigger render={<Button className="gap-2" />}>
+              <Plus className="w-4 h-4" /> Add New Book
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>{editingBookId ? 'Edit Book' : 'Add New Book'}</DialogTitle>
+                <DialogDescription>
+                  {editingBookId ? 'Update the details of the selected book.' : 'Enter the details of the new book to add it to the collection.'}
+                </DialogDescription>
+              </DialogHeader>
+              <Form {...form}>
+                <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="space-y-4">
                   <FormField
                     control={form.control}
-                    name="author"
+                    name="title"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Author</FormLabel>
+                        <FormLabel>Title</FormLabel>
                         <FormControl>
-                          <Input placeholder="F. Scott Fitzgerald" {...field} />
+                          <Input placeholder="The Great Gatsby" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="author"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Author</FormLabel>
+                          <FormControl>
+                            <Input placeholder="F. Scott Fitzgerald" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="genre"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Genre</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Classic" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   <FormField
                     control={form.control}
-                    name="genre"
+                    name="isbn"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Genre</FormLabel>
+                        <FormLabel>ISBN</FormLabel>
                         <FormControl>
-                          <Input placeholder="Classic" {...field} />
+                          <Input placeholder="978-0743273565" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </div>
-                <FormField
-                  control={form.control}
-                  name="isbn"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>ISBN</FormLabel>
-                      <FormControl>
-                        <Input placeholder="978-0743273565" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="publishedYear"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Published Year</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            {...field} 
-                            onChange={(e) => field.onChange(e.target.valueAsNumber || 0)} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="quantity"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Quantity</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            {...field} 
-                            onChange={(e) => field.onChange(e.target.valueAsNumber || 0)} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <Button type="submit" className="w-full">
-                  {editingBookId ? 'Update Book' : 'Save Book'}
-                </Button>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="publishedYear"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Published Year</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              {...field} 
+                              onChange={(e) => field.onChange(e.target.valueAsNumber || 0)} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="quantity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Quantity</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              {...field} 
+                              onChange={(e) => field.onChange(e.target.valueAsNumber || 0)} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <Button type="submit" className="w-full">
+                    {editingBookId ? 'Update Book' : 'Save Book'}
+                  </Button>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       <div className="flex items-center gap-2 max-w-sm">
@@ -241,19 +249,19 @@ const Books = () => {
               <TableHead>ISBN</TableHead>
               <TableHead>Year</TableHead>
               <TableHead>Qty</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              {isAdmin && <TableHead className="text-right">Actions</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={isAdmin ? 6 : 5} className="h-24 text-center">
                   Loading collection...
                 </TableCell>
               </TableRow>
             ) : filteredBooks.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-gray-500">
+                <TableCell colSpan={isAdmin ? 6 : 5} className="h-24 text-center text-gray-500">
                   No books found.
                 </TableCell>
               </TableRow>
@@ -283,26 +291,28 @@ const Books = () => {
                       {book.quantity}
                     </span>
                   </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-gray-400 hover:text-blue-500"
-                        onClick={() => handleEdit(book)}
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-gray-400 hover:text-red-500"
-                        onClick={() => void deleteBook(book._id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+                  {isAdmin && (
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-gray-400 hover:text-blue-500"
+                          onClick={() => handleEdit(book)}
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-gray-400 hover:text-red-500"
+                          onClick={() => void deleteBook(book._id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             )}

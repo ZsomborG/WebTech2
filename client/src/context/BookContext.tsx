@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { type Book, CreateBookDTO, UpdateBookDTO } from '../types/book';
+import type { Book, CreateBookDTO, UpdateBookDTO } from '../types/book';
 import { bookService } from '../services/BookService';
 import { toast } from 'sonner';
 

@@ -1,5 +1,5 @@
 import { BaseService } from './BaseService';
-import { type Book, CreateBookDTO, UpdateBookDTO } from '../types/book';
+import type {Book, CreateBookDTO, UpdateBookDTO} from '../types/book';
 
 export class BookService extends BaseService {
   async getBooks(): Promise<Book[]> {

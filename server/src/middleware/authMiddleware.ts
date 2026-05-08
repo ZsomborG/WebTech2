@@ -17,7 +17,11 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
     try {
       token = req.headers.authorization.split(' ')[1];
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as JwtPayload;
+      if (!process.env.JWT_SECRET) {
+        throw new Error('JWT_SECRET is not defined in environment variables');
+      }
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
 
       req.user = await User.findById(decoded.id).select('-password');
 

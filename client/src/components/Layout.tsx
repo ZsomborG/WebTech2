@@ -23,8 +23,17 @@ const Layout: React.FC = () => {
 
   const navItems = [
     { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-    { name: 'Books Inventory', path: '/books', icon: BookOpen },
+    { 
+      name: 'Books Inventory', 
+      path: '/books', 
+      icon: BookOpen,
+      roles: ['admin'] 
+    },
   ];
+
+  const filteredNavItems = navItems.filter(
+    item => !item.roles || (user && item.roles.includes(user.role))
+  );
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -36,7 +45,7 @@ const Layout: React.FC = () => {
         </div>
         
         <nav className="flex-1 p-2 space-y-1">
-          {navItems.map((item) => (
+          {filteredNavItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}

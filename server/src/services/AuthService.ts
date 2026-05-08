@@ -6,7 +6,10 @@ export class AuthService {
   constructor(private userRepo: UserRepository) {}
 
   private generateToken(id: string) {
-    return jwt.sign({ id }, process.env.JWT_SECRET || 'secret', {
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not defined in environment variables');
+    }
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
       expiresIn: '30d',
     });
   }
@@ -27,7 +30,7 @@ export class AuthService {
   }
 
   async login(credentials: any) {
-    const user: any = await this.userRepo.findByUsername(credentials.username);
+    const user: any = await this.userRepo.findByUsername(credentials.username, true);
     if (user && (await user.comparePassword(credentials.password))) {
       return {
         _id: user._id,
