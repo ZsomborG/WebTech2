@@ -13,7 +13,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Layout: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, switchRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -72,14 +72,26 @@ const Layout: React.FC = () => {
               <p className="text-gray-500 capitalize mt-0.5">{user?.role}</p>
             </div>
           </div>
-          <Button 
-            variant="ghost" 
-            className="w-full justify-start text-red-500 hover:bg-red-50 gap-2 h-8 text-xs"
-            onClick={handleLogout}
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Logout</span>
-          </Button>
+
+          <div className="space-y-1">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full text-[10px] text-gray-500 h-7 border-dashed" 
+              onClick={() => switchRole()}
+            >
+              Demo: Switch to {user?.role === 'admin' ? 'User' : 'Admin'}
+            </Button>
+            
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-red-500 hover:bg-red-50 gap-2 h-8 text-xs"
+              onClick={handleLogout}
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Logout</span>
+            </Button>
+          </div>
         </div>
       </aside>
 
