@@ -28,11 +28,20 @@ import {
   Badge,
   Skeleton,
 } from '@/components/ui';
-import { Plus, Search, Trash2, Edit2, Book as BookIcon, PackageOpen } from 'lucide-react';
+import { 
+  Plus, 
+  Search, 
+  Trash2, 
+  Edit2, 
+  Book as BookIcon, 
+  PackageOpen, 
+  HandHelping, 
+  RotateCcw 
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Books = () => {
-  const { books, loading, addBook, updateBook, deleteBook } = useBooks();
+  const { books, loading, addBook, updateBook, deleteBook, borrowBook, returnBook } = useBooks();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -242,10 +251,9 @@ const Books = () => {
             <TableRow className="bg-gray-50/50 hover:bg-gray-50/50">
               <TableHead className="w-[300px]">Book Details</TableHead>
               <TableHead>Genre</TableHead>
+              <TableHead>Status/Qty</TableHead>
               <TableHead>ISBN</TableHead>
-              <TableHead>Year</TableHead>
-              <TableHead>Qty</TableHead>
-              {isAdmin && <TableHead className="text-right">Actions</TableHead>}
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -262,15 +270,14 @@ const Books = () => {
                     </div>
                   </TableCell>
                   <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-12" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-8" /></TableCell>
-                  {isAdmin && <TableCell className="text-right"><Skeleton className="h-8 w-16 ml-auto" /></TableCell>}
+                  <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-24 font-mono" /></TableCell>
+                  <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
                 </TableRow>
               ))
             ) : filteredBooks.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={isAdmin ? 6 : 5} className="h-64 text-center">
+                <TableCell colSpan={5} className="h-64 text-center">
                   <div className="flex flex-col items-center justify-center space-y-3">
                     <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
                       <PackageOpen className="w-6 h-6" />
@@ -303,62 +310,107 @@ const Books = () => {
               </TableRow>
             ) : (
               <AnimatePresence mode="popLayout">
-                {filteredBooks.map((book, index) => (
-                  <motion.tr
-                    key={book._id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
-                    transition={{ duration: 0.2, delay: index * 0.02 }}
-                    className="border-b transition-colors hover:bg-gray-50/50 data-[state=selected]:bg-muted"
-                  >
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-gray-500">
-                          <BookIcon className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <p className="font-medium leading-none">{book.title}</p>
-                          <p className="text-xs text-gray-500 mt-1">{book.author}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="font-normal">
-                        {book.genre}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm font-mono">{book.isbn}</TableCell>
-                    <TableCell>{book.publishedYear}</TableCell>
-                    <TableCell>
-                      <span className={`font-medium ${book.quantity < 5 ? 'text-red-500' : 'text-gray-700'}`}>
-                        {book.quantity}
-                      </span>
-                    </TableCell>
-                    {isAdmin && (
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-gray-400 hover:text-blue-500"
-                            onClick={() => handleEdit(book)}
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-gray-400 hover:text-red-500"
-                            onClick={() => void deleteBook(book._id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                {filteredBooks.map((book, index) => {
+                  const isBorrowedByMe = book.activeBorrows?.some(b => 
+                    (typeof b.user === 'string' ? b.user : (b.user as any)._id) === user?._id
+                  );
+                  
+                  return (
+                    <motion.tr
+                      key={book._id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{ duration: 0.2, delay: index * 0.02 }}
+                      className="border-b transition-colors hover:bg-gray-50/50 data-[state=selected]:bg-muted"
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-gray-500">
+                            <BookIcon className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <p className="font-medium leading-none">{book.title}</p>
+                            <p className="text-xs text-gray-500 mt-1">{book.author}</p>
+                          </div>
                         </div>
                       </TableCell>
-                    )}
-                  </motion.tr>
-                ))}
+                      <TableCell>
+                        <Badge variant="secondary" className="font-normal">
+                          {book.genre}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${
+                              book.availableQuantity > 0 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-red-100 text-red-700'
+                            }`}>
+                              {book.availableQuantity > 0 ? 'Available' : 'Unavailable'}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {book.availableQuantity} / {book.quantity}
+                            </span>
+                          </div>
+                          {isBorrowedByMe && (
+                            <span className="text-[10px] text-blue-600 font-bold uppercase tracking-wider">
+                              In your possession
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm font-mono text-gray-500">{book.isbn}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          {isBorrowedByMe ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 gap-1.5 text-blue-600 border-blue-200 hover:bg-blue-50"
+                              onClick={() => void returnBook(book._id)}
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" />
+                              Return
+                            </Button>
+                          ) : book.availableQuantity > 0 ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 gap-1.5 text-green-600 border-green-200 hover:bg-green-50"
+                              onClick={() => void borrowBook(book._id)}
+                            >
+                              <HandHelping className="w-3.5 h-3.5" />
+                              Borrow
+                            </Button>
+                          ) : null}
+                          
+                          {isAdmin && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-gray-400 hover:text-blue-500"
+                                onClick={() => handleEdit(book)}
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-gray-400 hover:text-red-500"
+                                onClick={() => void deleteBook(book._id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                    </motion.tr>
+                  );
+                })}
               </AnimatePresence>
             )}
           </TableBody>

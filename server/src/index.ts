@@ -5,6 +5,7 @@ import { connectDB } from './config/db';
 import { errorHandler } from './middleware/errorMiddleware';
 import authRoutes from './routes/authRoutes';
 import bookRoutes from './routes/bookRoutes';
+import borrowRoutes from './routes/borrowRoutes';
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/books', bookRoutes);
+app.use('/api/borrows', borrowRoutes);
 
 // Error Handler (must be last)
 app.use(errorHandler);

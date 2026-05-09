@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { CreateBookDTO, UpdateBookDTO } from '../types/book';
 import { bookService } from '../services/BookService';
+import { borrowService } from '../services/BorrowService';
 import { toast } from 'sonner';
 
 export const useBooks = () => {
@@ -15,7 +16,7 @@ export const useBooks = () => {
     mutationFn: (bookData: CreateBookDTO) => bookService.addBook(bookData),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['books'] });
-      toast.success('Book added successfully');
+      // Success toast is handled in BookContext/original logic, but here we can add it too
     },
     onError: (error: any) => {
       toast.error(error.message || 'Failed to add book');
@@ -27,7 +28,6 @@ export const useBooks = () => {
       bookService.updateBook(id, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['books'] });
-      toast.success('Book updated successfully');
     },
     onError: (error: any) => {
       toast.error(error.message || 'Failed to update book');
@@ -38,10 +38,29 @@ export const useBooks = () => {
     mutationFn: (id: string) => bookService.deleteBook(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['books'] });
-      toast.success('Book removed');
     },
     onError: (error: any) => {
       toast.error(error.message || 'Failed to delete book');
+    },
+  });
+
+  const borrowBookMutation = useMutation({
+    mutationFn: (bookId: string) => borrowService.borrowBook(bookId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['books'] });
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to borrow book');
+    },
+  });
+
+  const returnBookMutation = useMutation({
+    mutationFn: (bookId: string) => borrowService.returnBook(bookId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['books'] });
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Failed to return book');
     },
   });
 
@@ -65,7 +84,27 @@ export const useBooks = () => {
 
   const deleteBook = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this book?')) return;
-    await deleteBookMutation.mutateAsync(id);
+    try {
+      await deleteBookMutation.mutateAsync(id);
+    } catch {
+      // Error handled by mutation
+    }
+  };
+
+  const borrowBook = async (id: string) => {
+    try {
+      await borrowBookMutation.mutateAsync(id);
+    } catch {
+      // Error handled by mutation
+    }
+  };
+
+  const returnBook = async (id: string) => {
+    try {
+      await returnBookMutation.mutateAsync(id);
+    } catch {
+      // Error handled by mutation
+    }
   };
 
   return {
@@ -74,7 +113,9 @@ export const useBooks = () => {
     addBook,
     updateBook,
     deleteBook,
-    // Keep these for compatibility or remove if safe
+    borrowBook,
+    returnBook,
+    // Keep these for compatibility
     fetchBooks: () => queryClient.invalidateQueries({ queryKey: ['books'] }),
     initialized: true, 
   };
