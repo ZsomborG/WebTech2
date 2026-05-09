@@ -7,6 +7,7 @@ export interface BookQueryOptions {
   order?: 'asc' | 'desc';
   search?: string;
   genre?: string;
+  all?: boolean;
 }
 
 export class BookRepository {
@@ -17,7 +18,8 @@ export class BookRepository {
       sortBy = 'createdAt', 
       order = 'desc',
       search,
-      genre
+      genre,
+      all
     } = options;
 
     const filter: any = {};
@@ -34,14 +36,16 @@ export class BookRepository {
       filter.genre = genre;
     }
 
-    const skip = (page - 1) * limit;
     const sortOrder = order === 'asc' ? 1 : -1;
+    const query = Book.find(filter).sort({ [sortBy]: sortOrder });
+
+    if (!all) {
+      const skip = (page - 1) * limit;
+      query.skip(skip).limit(limit);
+    }
 
     const [books, total] = await Promise.all([
-      Book.find(filter)
-        .sort({ [sortBy]: sortOrder })
-        .skip(skip)
-        .limit(limit),
+      query.exec(),
       Book.countDocuments(filter)
     ]);
 

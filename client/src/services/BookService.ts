@@ -18,6 +18,7 @@ export interface BookQueryFilters {
   order?: 'asc' | 'desc';
   search?: string;
   genre?: string;
+  all?: boolean;
 }
 
 export class BookService extends BaseService {

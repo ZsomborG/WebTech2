@@ -23,7 +23,8 @@ export class BookController {
       sortBy, 
       order, 
       search, 
-      genre 
+      genre,
+      all
     } = req.query;
 
     const options = {
@@ -33,6 +34,7 @@ export class BookController {
       order: order as 'asc' | 'desc',
       search: search as string,
       genre: genre as string,
+      all: all === 'true',
     };
 
     const result = await this.service.getAllBooks(options);
