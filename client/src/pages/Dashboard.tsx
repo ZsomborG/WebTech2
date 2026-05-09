@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { 
   BarChart, 
   Bar, 
@@ -74,16 +75,23 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             ))
-          : stats.map((stat) => (
-              <Card key={stat.title}>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-500">{stat.title}</CardTitle>
-                  <stat.icon className={`w-4 h-4 ${stat.color}`} />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                </CardContent>
-              </Card>
+          : stats.map((stat, index) => (
+              <motion.div
+                key={stat.title}
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+              >
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium text-gray-500">{stat.title}</CardTitle>
+                    <stat.icon className={`w-4 h-4 ${stat.color}`} />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stat.value}</div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))
         }
       </div>

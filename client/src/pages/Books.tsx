@@ -29,6 +29,7 @@ import {
   Skeleton,
 } from '@/components/ui';
 import { Plus, Search, Trash2, Edit2, Book as BookIcon, PackageOpen } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Books = () => {
   const { books, loading, addBook, updateBook, deleteBook } = useBooks();
@@ -301,55 +302,64 @@ const Books = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredBooks.map((book) => (
-                <TableRow key={book._id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-gray-500">
-                        <BookIcon className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <p className="font-medium leading-none">{book.title}</p>
-                        <p className="text-xs text-gray-500 mt-1">{book.author}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className="font-normal">
-                      {book.genre}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm font-mono">{book.isbn}</TableCell>
-                  <TableCell>{book.publishedYear}</TableCell>
-                  <TableCell>
-                    <span className={`font-medium ${book.quantity < 5 ? 'text-red-500' : 'text-gray-700'}`}>
-                      {book.quantity}
-                    </span>
-                  </TableCell>
-                  {isAdmin && (
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-gray-400 hover:text-blue-500"
-                          onClick={() => handleEdit(book)}
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-gray-400 hover:text-red-500"
-                          onClick={() => void deleteBook(book._id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+              <AnimatePresence mode="popLayout">
+                {filteredBooks.map((book, index) => (
+                  <motion.tr
+                    key={book._id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.2, delay: index * 0.02 }}
+                    className="border-b transition-colors hover:bg-gray-50/50 data-[state=selected]:bg-muted"
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-gray-500">
+                          <BookIcon className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="font-medium leading-none">{book.title}</p>
+                          <p className="text-xs text-gray-500 mt-1">{book.author}</p>
+                        </div>
                       </div>
                     </TableCell>
-                  )}
-                </TableRow>
-              ))
+                    <TableCell>
+                      <Badge variant="secondary" className="font-normal">
+                        {book.genre}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm font-mono">{book.isbn}</TableCell>
+                    <TableCell>{book.publishedYear}</TableCell>
+                    <TableCell>
+                      <span className={`font-medium ${book.quantity < 5 ? 'text-red-500' : 'text-gray-700'}`}>
+                        {book.quantity}
+                      </span>
+                    </TableCell>
+                    {isAdmin && (
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-gray-400 hover:text-blue-500"
+                            onClick={() => handleEdit(book)}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-gray-400 hover:text-red-500"
+                            onClick={() => void deleteBook(book._id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    )}
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
             )}
           </TableBody>
         </Table>
