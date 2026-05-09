@@ -118,6 +118,5 @@ export const useBooks = (filters: BookQueryFilters = {}) => {
     deleteBook,
     borrowBook,
     returnBook,
-    fetchBooks: () => queryClient.invalidateQueries({ queryKey: ['books'] }),
   };
 };

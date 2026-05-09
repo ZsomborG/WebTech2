@@ -35,11 +35,21 @@ export class BorrowService {
     });
   }
 
-  async returnBook(bookId: string, userId: string, isAdmin = false) {
-    const borrow = await this.borrowRepo.findActiveByBookAndUser(bookId, userId);
+  async returnBook(id: string, userId: string, isAdmin = false) {
+    let borrow;
+
+    if (isAdmin) {
+      borrow = await this.borrowRepo.findById(id);
+      
+      if (!borrow || borrow.status !== 'active') {
+        borrow = await this.borrowRepo.findActiveByBookAndUser(id, userId);
+      }
+    } else {
+      borrow = await this.borrowRepo.findActiveByBookAndUser(id, userId);
+    }
     
-    if (!borrow) {
-      throw new AppError('No active borrow found for this book and user', 404);
+    if (!borrow || borrow.status !== 'active') {
+      throw new AppError('No active borrow found for the provided identifier', 404);
     }
 
     return await this.borrowRepo.update(borrow._id.toString(), {

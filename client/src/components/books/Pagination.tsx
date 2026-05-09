@@ -19,6 +19,33 @@ export const Pagination: React.FC<PaginationProps> = ({
 }) => {
   if (totalPages <= 1) return null;
 
+  const getPageRange = () => {
+    const delta = 2;
+    const range = [];
+    const rangeWithDots = [];
+    let l;
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= currentPage - delta && i <= currentPage + delta)) {
+        range.push(i);
+      }
+    }
+
+    for (const i of range) {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l !== 1) {
+          rangeWithDots.push('...');
+        }
+      }
+      rangeWithDots.push(i);
+      l = i;
+    }
+
+    return rangeWithDots;
+  };
+
   return (
     <div className="flex items-center justify-between">
       <p className="text-sm text-gray-500">
@@ -38,17 +65,24 @@ export const Pagination: React.FC<PaginationProps> = ({
         >
           <ChevronLeft className="w-4 h-4" />
         </Button>
-        {Array.from({ length: totalPages }).map((_, i) => (
-          <Button
-            key={i + 1}
-            variant={currentPage === i + 1 ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => onPageChange(i + 1)}
-            className="h-8 w-8 p-0 text-xs"
-          >
-            {i + 1}
-          </Button>
-        )).slice(Math.max(0, currentPage - 3), Math.min(totalPages, currentPage + 2))}
+        
+        {getPageRange().map((page, i) => (
+          <React.Fragment key={i}>
+            {page === '...' ? (
+              <span className="px-2 text-gray-400 text-xs">...</span>
+            ) : (
+              <Button
+                variant={currentPage === page ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => onPageChange(page as number)}
+                className="h-8 w-8 p-0 text-xs"
+              >
+                {page}
+              </Button>
+            )}
+          </React.Fragment>
+        ))}
+
         <Button
           variant="outline"
           size="sm"
