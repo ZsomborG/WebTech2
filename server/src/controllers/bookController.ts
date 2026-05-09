@@ -1,4 +1,4 @@
-import { Response, NextFunction } from 'express';
+import { Response } from 'express';
 import { AuthRequest } from '../middleware/authMiddleware';
 import { bookService, BookService } from '../services/BookService';
 import { z } from 'zod';
@@ -7,7 +7,7 @@ import { AppError } from '../utils/AppError';
 const bookSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   author: z.string().min(1, 'Author is required'),
-  isbn: z.string().min(1, 'ISBN is required'),
+  isbn: z.string().min(10, 'ISBN is required'),
   publishedYear: z.number().int().min(1000).max(new Date().getFullYear()),
   genre: z.string().min(1, 'Genre is required'),
   quantity: z.number().int().min(0),
@@ -17,8 +17,26 @@ export class BookController {
   constructor(private service: BookService) {}
 
   getBooks = async (req: AuthRequest, res: Response) => {
-    const books = await this.service.getAllBooks();
-    res.json(books);
+    const { 
+      page, 
+      limit, 
+      sortBy, 
+      order, 
+      search, 
+      genre 
+    } = req.query;
+
+    const options = {
+      page: page ? parseInt(page as string) : undefined,
+      limit: limit ? parseInt(limit as string) : undefined,
+      sortBy: sortBy as string,
+      order: order as 'asc' | 'desc',
+      search: search as string,
+      genre: genre as string,
+    };
+
+    const result = await this.service.getAllBooks(options);
+    res.json(result);
   };
 
   addBook = async (req: AuthRequest, res: Response) => {

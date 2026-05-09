@@ -1,4 +1,4 @@
-import { bookRepository, BookRepository } from '../repositories/BookRepository';
+import { bookRepository, BookRepository, BookQueryOptions } from '../repositories/BookRepository';
 import { borrowRepository, BorrowRepository } from '../repositories/BorrowRepository';
 import { AppError } from '../utils/AppError';
 import { CreateBookDTO, UpdateBookDTO } from '../types/book';
@@ -9,12 +9,11 @@ export class BookService {
     private borrowRepo: BorrowRepository
   ) {}
 
-  async getAllBooks() {
-    const books = await this.bookRepo.findAll();
+  async getAllBooks(options: BookQueryOptions = {}) {
+    const { books, total } = await this.bookRepo.findAll(options);
     const activeBorrows = await this.borrowRepo.findAllActive();
 
-    // Attach active borrow count and user's borrow status to each book
-    return books.map(book => {
+    const bookList = books.map(book => {
       const bookBorrows = activeBorrows.filter(b => b.book._id.toString() === book._id.toString());
       return {
         ...book.toObject(),
@@ -22,6 +21,16 @@ export class BookService {
         activeBorrows: bookBorrows
       };
     });
+
+    return {
+      books: bookList,
+      pagination: {
+        total,
+        page: options.page || 1,
+        limit: options.limit || 10,
+        totalPages: Math.ceil(total / (options.limit || 10))
+      }
+    };
   }
 
   async createBook(bookData: CreateBookDTO, userId: string) {

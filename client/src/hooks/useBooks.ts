@@ -1,22 +1,24 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { CreateBookDTO, UpdateBookDTO } from '../types/book';
-import { bookService } from '../services/BookService';
+import { bookService, type BookQueryFilters } from '../services/BookService';
 import { borrowService } from '../services/BorrowService';
 import { toast } from 'sonner';
 
-export const useBooks = () => {
+export const useBooks = (filters: BookQueryFilters = {}) => {
   const queryClient = useQueryClient();
 
-  const { data: books = [], isLoading: loading } = useQuery({
-    queryKey: ['books'],
-    queryFn: () => bookService.getBooks(),
+  const { data, isLoading: loading } = useQuery({
+    queryKey: ['books', filters],
+    queryFn: () => bookService.getBooks(filters),
   });
+
+  const books = data?.books || [];
+  const pagination = data?.pagination;
 
   const addBookMutation = useMutation({
     mutationFn: (bookData: CreateBookDTO) => bookService.addBook(bookData),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['books'] });
-      // Success toast is handled in BookContext/original logic, but here we can add it too
     },
     onError: (error: any) => {
       toast.error(error.message || 'Failed to add book');
@@ -109,14 +111,13 @@ export const useBooks = () => {
 
   return {
     books,
+    pagination,
     loading,
     addBook,
     updateBook,
     deleteBook,
     borrowBook,
     returnBook,
-    // Keep these for compatibility
     fetchBooks: () => queryClient.invalidateQueries({ queryKey: ['books'] }),
-    initialized: true, 
   };
 };
