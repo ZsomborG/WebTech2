@@ -26,8 +26,9 @@ import {
   FormLabel,
   FormMessage,
   Badge,
+  Skeleton,
 } from '@/components/ui';
-import { Plus, Search, Trash2, Edit2, Book as BookIcon } from 'lucide-react';
+import { Plus, Search, Trash2, Edit2, Book as BookIcon, PackageOpen } from 'lucide-react';
 
 const Books = () => {
   const { books, loading, addBook, updateBook, deleteBook } = useBooks();
@@ -248,15 +249,55 @@ const Books = () => {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={isAdmin ? 6 : 5} className="h-24 text-center">
-                  Loading collection...
-                </TableCell>
-              </TableRow>
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="w-8 h-8 rounded" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-3 w-20" />
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-8" /></TableCell>
+                  {isAdmin && <TableCell className="text-right"><Skeleton className="h-8 w-16 ml-auto" /></TableCell>}
+                </TableRow>
+              ))
             ) : filteredBooks.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={isAdmin ? 6 : 5} className="h-24 text-center text-gray-500">
-                  No books found.
+                <TableCell colSpan={isAdmin ? 6 : 5} className="h-64 text-center">
+                  <div className="flex flex-col items-center justify-center space-y-3">
+                    <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
+                      <PackageOpen className="w-6 h-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="font-medium text-gray-900">
+                        {searchTerm ? 'No matches found' : 'No books in collection'}
+                      </p>
+                      <p className="text-sm text-gray-500 max-w-[200px] mx-auto text-balance">
+                        {searchTerm 
+                          ? `We couldn't find anything matching "${searchTerm}"`
+                          : isAdmin 
+                            ? 'Start building your library by adding your first book.'
+                            : 'Check back later for new arrivals.'
+                        }
+                      </p>
+                    </div>
+                    {isAdmin && !searchTerm && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setIsDialogOpen(true)}
+                        className="mt-2"
+                      >
+                        Add Your First Book
+                      </Button>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (

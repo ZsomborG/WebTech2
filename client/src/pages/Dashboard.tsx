@@ -12,7 +12,13 @@ import {
 } from 'recharts';
 import { useBooks } from '../hooks/useBooks';
 import { APP_CONSTANTS } from '../constants/app.constants';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
+import { 
+  Skeleton,
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui';
 import { BookOpen, Package, Hash } from 'lucide-react';
 
 const Dashboard = () => {
@@ -42,8 +48,6 @@ const Dashboard = () => {
     return acc;
   }, []).sort((a, b) => parseInt(a.year) - parseInt(b.year));
 
-  if (loading) return <div className="p-4 text-gray-500">Loading dashboard data...</div>;
-
   const stats = [
     { title: 'Total Copies', value: totalBooks, icon: Package, color: 'text-blue-500' },
     { title: 'Unique Titles', value: uniqueTitles, icon: BookOpen, color: 'text-green-500' },
@@ -58,17 +62,30 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        {stats.map((stat) => (
-          <Card key={stat.title}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">{stat.title}</CardTitle>
-              <stat.icon className={`w-4 h-4 ${stat.color}`} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-            </CardContent>
-          </Card>
-        ))}
+        {loading 
+          ? Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i}>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="w-4 h-4 rounded-full" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-8 w-16" />
+                </CardContent>
+              </Card>
+            ))
+          : stats.map((stat) => (
+              <Card key={stat.title}>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-500">{stat.title}</CardTitle>
+                  <stat.icon className={`w-4 h-4 ${stat.color}`} />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stat.value}</div>
+                </CardContent>
+              </Card>
+            ))
+        }
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -77,23 +94,29 @@ const Dashboard = () => {
             <CardTitle className="text-lg">Books by Genre</CardTitle>
           </CardHeader>
           <CardContent className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={genreData}
-                  cx="50%"
-                  cy="50%"
-                  label={({ name, percent }) => `${name} (${((percent || 0) * 100).toFixed(0)}%)`}
-                  outerRadius={80}
-                  dataKey="value"
-                >
-                  {genreData.map((_entry, index) => (
-                    <Cell key={`cell-${index}`} fill={APP_CONSTANTS.CHART_COLORS[index % APP_CONSTANTS.CHART_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <div className="flex items-center justify-center h-full">
+                <Skeleton className="w-48 h-48 rounded-full" />
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={genreData}
+                    cx="50%"
+                    cy="50%"
+                    label={({ name, percent }) => `${name} (${((percent || 0) * 100).toFixed(0)}%)`}
+                    outerRadius={80}
+                    dataKey="value"
+                  >
+                    {genreData.map((_entry, index) => (
+                      <Cell key={`cell-${index}`} fill={APP_CONSTANTS.CHART_COLORS[index % APP_CONSTANTS.CHART_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
@@ -102,15 +125,34 @@ const Dashboard = () => {
             <CardTitle className="text-lg">Books by Year</CardTitle>
           </CardHeader>
           <CardContent className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={yearData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="year" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill={APP_CONSTANTS.CHART_COLORS[0]} radius={[2, 2, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <div className="flex flex-col gap-2 h-full justify-end">
+                <div className="flex items-end gap-2 h-full">
+                  <Skeleton className="flex-1 h-[40%]" />
+                  <Skeleton className="flex-1 h-[70%]" />
+                  <Skeleton className="flex-1 h-[50%]" />
+                  <Skeleton className="flex-1 h-[90%]" />
+                  <Skeleton className="flex-1 h-[60%]" />
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="flex-1 h-3" />
+                  <Skeleton className="flex-1 h-3" />
+                  <Skeleton className="flex-1 h-3" />
+                  <Skeleton className="flex-1 h-3" />
+                  <Skeleton className="flex-1 h-3" />
+                </div>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={yearData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="year" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="count" fill={APP_CONSTANTS.CHART_COLORS[0]} radius={[2, 2, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
