@@ -23,7 +23,7 @@ export class BookService {
     });
 
     return {
-      books: bookList,
+      data: bookList,
       pagination: {
         total,
         page: options.page || 1,

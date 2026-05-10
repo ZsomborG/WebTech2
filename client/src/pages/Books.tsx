@@ -68,12 +68,12 @@ const Books = () => {
   };
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-8 pb-8">
       {/* Header Section */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Books Inventory</h1>
-          <p className="text-gray-500 text-sm">
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Books Inventory</h1>
+          <p className="text-sm text-gray-500">
             {isAdmin ? 'Manage and track your library collection.' : 'View and search the library collection.'}
           </p>
         </div>
@@ -89,17 +89,19 @@ const Books = () => {
         )}
       </div>
 
-      {/* Filter Bar */}
-      <BookFilters
-        searchInput={searchInput}
-        onSearchChange={setSearchInput}
-        genre={filters.genre}
-        onGenreChange={(val) => setFilters(prev => ({ ...prev, genre: val, page: 1 }))}
-        sortBy={filters.sortBy}
-        order={filters.order}
-        onSortChange={handleSortChange}
-        onOrderToggle={() => setFilters(prev => ({ ...prev, order: prev.order === 'asc' ? 'desc' : 'asc' }))}
-      />
+      {/* Sticky Filter Bar */}
+      <div className="sticky top-0 z-10 bg-zinc-100/95 backdrop-blur-md border-b border-zinc-200/80 -mx-6 px-6 py-4 mb-4 shadow-sm">
+        <BookFilters
+          searchInput={searchInput}
+          onSearchChange={setSearchInput}
+          genre={filters.genre}
+          onGenreChange={(val) => setFilters(prev => ({ ...prev, genre: val, page: 1 }))}
+          sortBy={filters.sortBy}
+          order={filters.order}
+          onSortChange={handleSortChange}
+          onOrderToggle={() => setFilters(prev => ({ ...prev, order: prev.order === 'asc' ? 'desc' : 'asc' }))}
+        />
+      </div>
 
       {/* Table Section */}
       <BookTable

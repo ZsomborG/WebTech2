@@ -52,15 +52,15 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-gray-500 text-sm">Real-time overview of library activity.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Library Insights</h1>
+        <p className="text-sm text-gray-500">A real-time overview of your library collection and activity.</p>
       </div>
 
       <StatsGrid stats={stats} loading={loading} />
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         <GenreChart data={genreData} loading={loading} />
         <YearChart data={yearData} loading={loading} />
       </div>

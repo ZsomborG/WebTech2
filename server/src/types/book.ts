@@ -1,3 +1,6 @@
+import { z } from 'zod';
+import { createBookSchema, updateBookSchema } from '../schemas/book.schema';
+
 export interface Book {
   _id: string;
   title: string;
@@ -11,5 +14,5 @@ export interface Book {
   updatedAt: Date;
 }
 
-export type CreateBookDTO = Omit<Book, '_id' | 'addedBy' | 'createdAt' | 'updatedAt'>;
-export type UpdateBookDTO = Partial<CreateBookDTO>;
+export type CreateBookDTO = z.infer<typeof createBookSchema>;
+export type UpdateBookDTO = z.infer<typeof updateBookSchema>;
